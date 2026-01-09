@@ -11,13 +11,16 @@
             @cell-click="makeMove(idx)" />
     </div>
     <div class="reset-container">
-        <button @click="resetGame()" class="reset-btn">Reset</button>
+        <button @click="resetGame(); resetPhase();" class="reset-btn">Reset</button>
     </div>
 </template>
 <script setup>
+import { ref } from "vue";
 import GameCell from "@/components/GameCell.vue"
 import { useTicTacToeGame } from '@/composables/useTicTacToe';
 import { useScatterGrid } from '@/composables/useScatterGrid';
+
+const canInteract = ref(false);
 
 const {
     cells,
@@ -26,9 +29,9 @@ const {
     makeMove,
     resetGame,
     isGameOver
-} = useTicTacToeGame()
+} = useTicTacToeGame(canInteract)
 
-const { registerCell } = useScatterGrid(moveCount, isGameOver)
+const { registerCell, resetPhase } = useScatterGrid(moveCount, isGameOver, canInteract)
 
 </script>
 

@@ -20,6 +20,7 @@ export function useTicTacToeGame(canInteract) {
   const moveCount = ref(0);
 
   function makeMove(index) {
+    if (!canInteract.value) return;
     if (isGameOver.value) return;
     if (index < 0 || index > 8) return;
     if (cells.value[index] !== null) return;

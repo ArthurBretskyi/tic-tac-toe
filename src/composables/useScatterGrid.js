@@ -1,7 +1,7 @@
-import { ref, watch, computed } from "vue";
+import { ref, watch } from "vue";
 
-export function useScatterGrid(moveCount, isGameOver) {
-  const viewMode = ref("grid");
+export function useScatterGrid(moveCount, isGameOver, canInteract) {
+  const phase = ref("initial");
 
   const cellRefs = [];
 
@@ -10,6 +10,8 @@ export function useScatterGrid(moveCount, isGameOver) {
   }
 
   function scatterCells() {
+    if (isGameOver.value) return;
+
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
 
@@ -35,26 +37,47 @@ export function useScatterGrid(moveCount, isGameOver) {
     });
   }
 
-  watch(viewMode, (mode) => {
-    mode === "scatter" ? scatterCells() : resetCellsToGrid();
-  });
+  function resetPhase() {
+    phase.value = "initial";
+  }
+
+  watch(
+    phase,
+    (p) => {
+      canInteract.value = p === "initial" || p === "scatter";
+
+      if (p === "scatter") scatterCells();
+      if (p === "grid" || p === "initial") resetCellsToGrid();
+    },
+    { immediate: true }
+  );
 
   watch(moveCount, (count) => {
-    if (count === 0) {
-      viewMode.value = "grid";
+    if (isGameOver.value) return;
+
+    if (count === 1) {
+      phase.value = "scatter";
       return;
     }
 
-    viewMode.value = "grid";
+    phase.value = "grid";
 
     setTimeout(() => {
       if (!isGameOver.value) {
-        viewMode.value = "scatter";
+        phase.value = "scatter";
       }
     }, 800);
   });
 
+  watch(isGameOver, (over) => {
+    if (over) {
+      phase.value = "grid";
+      canInteract.value = false;
+    }
+  });
+
   return {
     registerCell,
+    resetPhase,
   };
 }
