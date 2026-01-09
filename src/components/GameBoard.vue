@@ -7,7 +7,7 @@
         It's a draw
     </div>
     <div class="game-board">
-        <GameCell v-for="(cell, idx) in cells" :key="idx" :value="cell" :ref="el => cellRefs[idx] = el"
+        <GameCell v-for="(cell, idx) in cells" :key="idx" :value="cell" :ref="el => registerCell(idx, el)"
             @cell-click="makeMove(idx)" />
     </div>
     <div class="reset-container">
@@ -15,9 +15,9 @@
     </div>
 </template>
 <script setup>
-import { ref, watch } from 'vue'
 import GameCell from "@/components/GameCell.vue"
 import { useTicTacToeGame } from '@/composables/useTicTacToe';
+import { useScatterGrid } from '@/composables/useScatterGrid';
 
 const {
     cells,
@@ -28,57 +28,7 @@ const {
     isGameOver
 } = useTicTacToeGame()
 
-const viewMode = ref('grid')
-
-const cellRefs = []
-
-function scatterCells() {
-    const viewportWidth = window.innerWidth
-    const viewportHeight = window.innerHeight
-
-    cellRefs.forEach(cell => {
-        const rect = cell.root.getBoundingClientRect()
-
-        const maxX = viewportWidth - rect.right
-        const minX = -rect.left
-
-        const maxY = viewportHeight - rect.bottom
-        const minY = -rect.top
-
-        const x = minX + Math.random() * (maxX - minX)
-        const y = minY + Math.random() * (maxY - minY)
-
-        cell.root.style.transform = `translate(${x}px, ${y}px)`
-    })
-}
-
-function resetCellsToGrid() {
-    cellRefs.forEach((cell) => {
-        cell.root.style.transform = 'translate(0px, 0px)'
-    })
-}
-watch(viewMode, (mode) => {
-    if (mode === 'scatter') {
-        scatterCells()
-    } else {
-        resetCellsToGrid()
-    }
-})
-
-watch(moveCount, (count) => {
-    if (count === 0) {
-        viewMode.value = 'grid'
-        return
-    }
-
-    viewMode.value = 'grid'
-
-    setTimeout(() => {
-        if (!isGameOver.value) {
-            viewMode.value = 'scatter'
-        }
-    }, 800)
-})
+const { registerCell } = useScatterGrid(moveCount, isGameOver)
 
 </script>
 

@@ -1,7 +1,7 @@
 import { ref, computed } from "vue";
 import { checkWinner } from "@/utils/checkWinner";
 
-export function useTicTacToeGame() {
+export function useTicTacToeGame(canInteract) {
   const cells = ref(Array(9).fill(null));
   const currentPlayer = ref("X");
 
