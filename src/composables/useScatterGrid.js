@@ -53,6 +53,11 @@ export function useScatterGrid(moveCount, isGameOver, canInteract) {
   );
 
   watch(moveCount, (count) => {
+    if (count === 0) {
+      phase.value = "initial";
+      return;
+    }
+
     if (isGameOver.value) return;
 
     if (count === 1) {
@@ -79,5 +84,6 @@ export function useScatterGrid(moveCount, isGameOver, canInteract) {
   return {
     registerCell,
     resetPhase,
+    phase,
   };
 }

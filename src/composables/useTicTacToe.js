@@ -36,6 +36,7 @@ export function useTicTacToeGame(canInteract) {
   function resetGame() {
     cells.value = Array(9).fill(null);
     currentPlayer.value = "X";
+    moveCount.value = 0;
   }
 
   return {

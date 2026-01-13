@@ -10,12 +10,9 @@
         <GameCell v-for="(cell, idx) in cells" :key="idx" :value="cell" :ref="el => registerCell(idx, el)"
             @cell-click="makeMove(idx)" />
     </div>
-    <div class="reset-container">
-        <button @click="resetGame(); resetPhase();" class="reset-btn">Reset</button>
-    </div>
 </template>
 <script setup>
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import GameCell from "@/components/GameCell.vue"
 import { useTicTacToeGame } from '@/composables/useTicTacToe';
 import { useScatterGrid } from '@/composables/useScatterGrid';
@@ -31,7 +28,32 @@ const {
     isGameOver
 } = useTicTacToeGame(canInteract)
 
-const { registerCell, resetPhase } = useScatterGrid(moveCount, isGameOver, canInteract)
+const { registerCell, resetPhase, phase } = useScatterGrid(moveCount, isGameOver, canInteract)
+
+function resetRound() {
+    roundStarted.value = false;
+}
+
+defineExpose({
+    resetGame,
+    resetPhase,
+    resetRound
+})
+
+const roundStarted = ref(false);
+
+const emit = defineEmits(["game-started", "game-ended"]);
+
+watch(moveCount, (count) => {
+    if (count === 1 && !roundStarted.value) {
+        roundStarted.value = true;
+        emit("game-started");
+    }
+});
+
+watch(isGameOver, (v) => {
+    if (v) emit("game-ended");
+});
 
 </script>
 
@@ -41,24 +63,11 @@ const { registerCell, resetPhase } = useScatterGrid(moveCount, isGameOver, canIn
     grid-template-columns: repeat(3, 1fr);
 }
 
-.reset-btn {
-    background-color: #fff;
-    color: #000;
-    padding: 10px;
-    border-radius: 10px;
-    text-transform: uppercase;
-    cursor: pointer;
-    transition: all 0.3s ease-in-out;
-}
-
-.reset-btn:hover {
-    background-color: #000;
-    color: #fff;
-}
 
 .win {
     font-size: 1.5rem;
-    color: greenyellow
+    color: greenyellow;
+    text-align: center;
 }
 
 .win span {
