@@ -3,6 +3,11 @@ import { checkWinner } from "@/utils/checkWinner";
 
 export function useTicTacToeGame(canInteract) {
   const cells = ref(Array(9).fill(null));
+
+  const gameMode = ref("human-vs-ai"); // або human-vs-human
+  const humanPlayer = "X";
+  const aiPlayer = "O";
+
   const currentPlayer = ref("X");
 
   const winner = computed(() => {
@@ -41,6 +46,9 @@ export function useTicTacToeGame(canInteract) {
 
   return {
     cells,
+    gameMode,
+    humanPlayer,
+    aiPlayer,
     currentPlayer,
     winner,
     isDraw,
