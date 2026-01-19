@@ -11,6 +11,17 @@
         {{ firstMoveText }}
     </div>
 
+    <div v-if="showPreGameUI" class="mode-switch">
+        <button :class="{ active: gameMode === 'human-vs-human' }" @click="setMode('human-vs-human')">
+            2 Players
+        </button>
+
+        <button :class="{ active: gameMode === 'human-vs-ai' }" @click="setMode('human-vs-ai')">
+            Vs Computer
+        </button>
+    </div>
+
+
     <div class="game-board">
         <GameCell v-for="(cell, idx) in cells" :key="idx" :value="cell" :ref="el => registerCell(idx, el)"
             @cell-click="makeMove(idx)" />
@@ -28,6 +39,7 @@ const canInteract = ref(false);
 const {
     cells,
     currentPlayer,
+    gameMode,
     winner,
     moveCount,
     makeMove,
@@ -43,15 +55,23 @@ useComputerPlayer({
     makeMove,
     isGameOver,
     canInteract,
-    aiPlayer: "O"
+    aiPlayer: "O",
+    enabled: computed(() => gameMode.value === "human-vs-ai")
 });
 
 const firstPlayer = ref(null);
 
-const showFirstMove = computed(() => {
-    return phase.value === "initial" && !roundStarted.value;
+const showPreGameUI = computed(() => {
+    return !roundStarted.value;
 });
 
+const showFirstMove = computed(() => {
+    return (
+        showPreGameUI.value &&
+        gameMode.value === "human-vs-ai" &&
+        phase.value === "initial"
+    );
+});
 
 function startNewRound() {
     resetGame();
@@ -67,6 +87,14 @@ const firstMoveText = computed(() => {
         ? "First move: You"
         : "First move: Computer";
 });
+
+function setMode(mode) {
+    if (gameMode.value === mode) return;
+
+    gameMode.value = mode;
+    resetPhase();
+    resetRound();
+}
 
 function resetRound() {
     roundStarted.value = false;
@@ -123,5 +151,24 @@ onMounted(() => {
     color: #fff;
     margin-bottom: 1rem;
     text-align: center;
+}
+
+.mode-switch {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.mode-switch button {
+    padding: 6px 12px;
+    border-radius: 8px;
+    background: #333;
+    color: #fff;
+    cursor: pointer;
+}
+
+.mode-switch button.active {
+    background: greenyellow;
+    color: #000;
 }
 </style>
