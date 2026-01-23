@@ -24,7 +24,7 @@
 
     <div class="game-board">
         <GameCell v-for="(cell, idx) in cells" :key="idx" :value="cell" :ref="el => registerCell(idx, el)"
-            @cell-click="makeMove(idx)" />
+            @cell-click="handleCellClick(idx)" />
     </div>
 </template>
 <script setup>
@@ -49,17 +49,24 @@ const {
 
 const { registerCell, resetPhase, phase } = useScatterGrid(moveCount, isGameOver, canInteract)
 
-useComputerPlayer({
+const { isThinking } = useComputerPlayer({
     cells,
     currentPlayer,
     makeMove,
     isGameOver,
     canInteract,
     aiPlayer: "O",
-    enabled: computed(() => gameMode.value === "human-vs-ai")
+    enabled: computed(() => gameMode.value === "human-vs-ai"),
+    phase
 });
 
 const firstPlayer = ref(null);
+
+function handleCellClick(index) {
+    if (isThinking.value) return;
+    makeMove(index);
+}
+
 
 const showPreGameUI = computed(() => {
     return !roundStarted.value;
